@@ -4,6 +4,9 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, restore the MYSQL database in the DB folder, then start React front-end and Flask back-end server to run the app. Two terminal windows required to run these two commands.
 
+`server.py`
+The DB connection and SMTP mail service need to be set up correctly before running the app, configure them in the `server.py`
+
 ### `npm start`
 
 Runs front-end ReactJS 
