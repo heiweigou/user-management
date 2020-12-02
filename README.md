@@ -15,3 +15,5 @@ Set the Flask app path in the terminal, then run the app with command below
 
 Runs back-end Flask server.
 
+The app will run at URL below:
+`http://localhost:3000/`
