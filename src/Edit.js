@@ -1,39 +1,12 @@
 import React from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Form, Col, Inpu } from 'react-bootstrap'
+import { Button, Form, Col, Input,Table } from 'react-bootstrap'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
 import { format, compareAsc, addMonths, addWeeks, differenceInCalendarMonths } from 'date-fns'
 import { BrowserRouter as Router, Switch, Route, Redirect, Link } from 'react-router-dom'
-import Autosuggest from 'react-autosuggest';
 
-function escapeRegexCharacters(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
-  
-//   function getSuggestions(value) {
-//     const escapedValue = escapeRegexCharacters(value.trim());
-    
-//     if (escapedValue === '') {
-//       return [];
-//     }
-  
-//     const regex = new RegExp('^' + escapedValue, 'i');
-  
-//     return languages.filter(language => regex.test(language.name));
-//   }
-  
-  function getSuggestionValue(suggestion) {
-    return suggestion.name;
-  }
-  
-  function renderSuggestion(suggestion) {
-    return (
-      <span>{suggestion.name}</span>
-    );
-  }
-
-class Create extends React.Component {
+class Edit extends React.Component {
     constructor() {
         super()
         this.state = {
@@ -53,7 +26,7 @@ class Create extends React.Component {
             isOngoingAccess: false,
             isSubmitted: false,
             timeStamp:'',
-            suggestions:[]
+            emails:[]
 
         }
         this.checkHandler = this.checkHandler.bind(this)
@@ -63,15 +36,32 @@ class Create extends React.Component {
         this.selectAppHandler = this.selectAppHandler.bind(this)
     }
 
-    componentDidMount(){
-
-    }
-
     showAccessPeriod() {
         let numberOfMonths = null
         let { accessStartDate, accessEndDate } = this.state
         numberOfMonths = differenceInCalendarMonths(accessEndDate, accessStartDate)
         return numberOfMonths
+    }
+    componentDidMount(){
+        fetch('/incidents/edit/'+this.props.incidentId)
+        .then(res=>res.json())
+        .then(result=>{
+            Object.entries(result.data.incidents.typeOfAccess).forEach(([key,value])=>{
+                if(value===0){
+                    result.data.incidents.typeOfAccess[key]=false
+                }
+                else if(value===1){
+                    result.data.incidents.typeOfAccess[key]=true
+                }
+            })
+            console.log(result.data)
+            this.setState(result.data.incidents)
+            this.setState({
+                emails:result.data.emails
+            })
+
+           
+        })
     }
 
     accessHandler(e) {
@@ -155,7 +145,7 @@ class Create extends React.Component {
             [name]: value,
 
         })
-    
+
 
         if (name === 'months' && !isNaN(value)) {
 
@@ -198,7 +188,9 @@ class Create extends React.Component {
         data.accessStartDate = format(data.accessStartDate, 'yyyy-MM-dd HH:mm:ss')
         data.requestedDate = format(data.requestedDate, 'yyyy-MM-dd HH:mm:ss')
         data.accessEndDate = data.accessEndDate !== null ? format(data.accessEndDate, 'yyyy-MM-dd HH:mm:ss') : null
-        fetch('/add', {
+
+        
+        fetch('/incidents/edit/'+this.props.incidentId, {
             method: 'POST',
             body: JSON.stringify(data),
             headers: {
@@ -225,15 +217,8 @@ class Create extends React.Component {
                     <Form.Control name='incident' type='text' value={this.state.incident} onChange={this.inputHandler} />
                 </Form.Group>
                 <Form.Group as={Col}>
-                    <Form.Label>Email</Form.Label>                  
+                    <Form.Label>Email</Form.Label>
                     <Form.Control name='email' type='email' value={this.state.email} onChange={this.inputHandler} />
-                    {/* <Autosuggest 
-        suggestions={suggestions}
-        onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-        onSuggestionsClearRequested={this.onSuggestionsClearRequested}
-        getSuggestionValue={getSuggestionValue}
-        renderSuggestion={renderSuggestion}
-        inputProps={inputProps} /> */}
                 </Form.Group>
             </Form.Row>
             <Form.Row>
@@ -270,7 +255,7 @@ class Create extends React.Component {
                             value='read_rai'
 
                             inline
-                            checked={this.state.typeOfAccess.read_rai}
+                            checked={this.state.typeOfAccess['read_rai'.toLowerCase()]}
                             onChange={this.accessHandler}
 
                         />
@@ -280,7 +265,7 @@ class Create extends React.Component {
                                 name='rai'
                                 value='update_rai'
                                 inline
-                                checked={this.state.typeOfAccess.update_rai}
+                                checked={this.state.typeOfAccess['update_rai'.toLowerCase()]}
                                 onChange={this.accessHandler}
 
                             />
@@ -290,7 +275,7 @@ class Create extends React.Component {
                                 name='rai'
                                 value='insert_update_rai'
                                 inline
-                                checked={this.state.typeOfAccess.insert_update_rai}
+                                checked={this.state.typeOfAccess['insert_update_rai'.toLowerCase()]}
                                 onChange={this.accessHandler}
 
                             /></div>
@@ -302,7 +287,7 @@ class Create extends React.Component {
                                     name='scats'
                                     value='scats'
                                     inline
-                                    checked={this.state.typeOfAccess.scats}
+                                    checked={this.state.typeOfAccess['scats'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -311,7 +296,7 @@ class Create extends React.Component {
                                     name='scats'
                                     value='SCATS_Traffic_Report'
                                     inline
-                                    checked={this.state.typeOfAccess.SCATS_Traffic_Report}
+                                    checked={this.state.typeOfAccess['SCATS_Traffic_Report'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -320,7 +305,7 @@ class Create extends React.Component {
                                     name='scats'
                                     value='SCATS_History_Viewer'
                                     inline
-                                    checked={this.state.typeOfAccess.SCATS_History_Viewer}
+                                    checked={this.state.typeOfAccess['SCATS_History_Viewer'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -329,7 +314,7 @@ class Create extends React.Component {
                                     name='scats'
                                     value='Unusual_Congestion_Viewer'
                                     inline
-                                    checked={this.state.typeOfAccess.Unusual_Congestion_Viewer}
+                                    checked={this.state.typeOfAccess['Unusual_Congestion_Viewer'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -338,7 +323,7 @@ class Create extends React.Component {
                                     name='scats'
                                     value='LxListG'
                                     inline
-                                    checked={this.state.typeOfAccess.LxListG}
+                                    checked={this.state.typeOfAccess['LxListG'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                             </div>
@@ -350,7 +335,7 @@ class Create extends React.Component {
                                     name='streams'
                                     value='Monitor_All'
                                     inline
-                                    checked={this.state.typeOfAccess.Monitor_All}
+                                    checked={this.state.typeOfAccess['Monitor_All'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -359,7 +344,7 @@ class Create extends React.Component {
                                     value='Monitor_Limited'
                                     name='streams'
                                     inline
-                                    checked={this.state.typeOfAccess.Monitor_Limited}
+                                    checked={this.state.typeOfAccess['Monitor_Limited'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -368,7 +353,7 @@ class Create extends React.Component {
                                     value='Media'
                                     name='streams'
                                     inline
-                                    checked={this.state.typeOfAccess.Media}
+                                    checked={this.state.typeOfAccess['Media'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -377,7 +362,7 @@ class Create extends React.Component {
                                     value='Ramp_Control'
                                     name='streams'
                                     inline
-                                    checked={this.state.typeOfAccess.Ramp_Control}
+                                    checked={this.state.typeOfAccess['Ramp_Control'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -386,7 +371,7 @@ class Create extends React.Component {
                                     value='Ramp_Monitoring'
                                     name='streams'
                                     inline
-                                    checked={this.state.typeOfAccess.Ramp_Monitoring}
+                                    checked={this.state.typeOfAccess['Ramp_Monitoring'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -395,7 +380,7 @@ class Create extends React.Component {
                                     value='Regional_Maint'
                                     name='streams'
                                     inline
-                                    checked={this.state.typeOfAccess.Regional_Maint}
+                                    checked={this.state.typeOfAccess['Regional_Maint'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -404,7 +389,7 @@ class Create extends React.Component {
                                     value='Regional_Maintenance_with_DMS'
                                     name='streams'
                                     inline
-                                    checked={this.state.typeOfAccess.Regional_Maintenance_with_DMS}
+                                    checked={this.state.typeOfAccess['Regional_Maintenance_with_DMS'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -413,7 +398,7 @@ class Create extends React.Component {
                                     value='Signal_Control'
                                     name='streams'
                                     inline
-                                    checked={this.state.typeOfAccess.Signal_Control}
+                                    checked={this.state.typeOfAccess['Signal_Control'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -422,7 +407,7 @@ class Create extends React.Component {
                                     value='TMC'
                                     name='streams'
                                     inline
-                                    checked={this.state.typeOfAccess.TMC}
+                                    checked={this.state.typeOfAccess['TMC'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -431,7 +416,7 @@ class Create extends React.Component {
                                     value='TMC_Support'
                                     name='streams'
                                     inline
-                                    checked={this.state.typeOfAccess.TMC_Support}
+                                    checked={this.state.typeOfAccess['TMC_Support'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                                 <Form.Check
@@ -440,7 +425,7 @@ class Create extends React.Component {
                                     value='ITS_Project'
                                     name='streams'
                                     inline
-                                    checked={this.state.typeOfAccess.ITS_Project}
+                                    checked={this.state.typeOfAccess['ITS_Project'.toLowerCase()]}
                                     onChange={this.accessHandler}
                                 />
                             </div>
@@ -491,6 +476,32 @@ class Create extends React.Component {
                 </Form.Row>
             </>}
 
+            <Form.Group>
+                <Form.Label>Reminder History</Form.Label>
+                <Table striped bordered hover variant="dark">
+                    <thead>
+                        <tr>
+                            <td>Title</td>
+                            <td>Content</td>
+                            <td>Date</td>
+                            <td>Status</td>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {this.state.emails.map(item=>{
+                            return(<tr>
+                                <td>{item.header}</td>·
+                                <td>{item.body}</td>
+                                <td>{item.date}</td>
+                                <td>{item.status}</td>
+                            </tr>)
+                        })}
+                    </tbody>
+                </Table>
+            </Form.Group>
+
 
             <Button variant='primary' type='submit'>
                 Submit
@@ -507,4 +518,4 @@ class Create extends React.Component {
     }
 }
 
-export default Create
+export default Edit

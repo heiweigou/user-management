@@ -1,0 +1,28 @@
+dummy json data for ALL incidents
+
+[
+  '{{repeat(20, 30)}}',
+  {
+    index: '{{index()}}',
+    incident: '{{"INC"+objectId()}}',
+    app:'{{random("RAI","STREAMS","SCATS")}}',
+    name: '{{firstName()}} {{surname()}}',
+    email:'{{email()}}',
+    department:'{{company().toUpperCase()}}',
+    typeOfAccess:'{{random("read", "insert and update")}}',
+    approvedBy:'{{firstName()}} {{surname()}}',
+    approvedByITS:'{{firstName()}} {{surname()}}',
+    requestedDate:'{{new Date(2014, 1, 1)}}',
+    accessStartDate:'{{date(new Date(2014, 2, 1), new Date())}}',
+    accessEndDate:'{{date(new Date(2019, 5, 1), new Date(2020,6,1))}}',
+    isOngoingAccess:'{{random(true, false)}}',
+    disabledDate:null,
+    extensionDate:null,
+    comment: '{{lorem(1, "paragraphs")}}',
+    createdBy:'{{firstName()}} {{surname()}}',
+    updatedBy:'{{firstName()}} {{surname()}}',
+    lastUpdated:''
+    
+  }
+]
+
